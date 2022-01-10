@@ -1,0 +1,14 @@
+[
+    {
+        "name": "UserController",
+        "documentation": "",
+        "type": "typeof UserController",
+        "constructors": [
+            {
+                "parameters": [],
+                "returnType": "UserController",
+                "documentation": ""
+            }
+        ]
+    }
+]
