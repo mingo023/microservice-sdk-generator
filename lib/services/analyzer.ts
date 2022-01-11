@@ -23,7 +23,6 @@ export function visitMicroserviceClass(
   }
 
   if (tsc.isClassDeclaration(node) && node.name) {
-    // This is a top level class, get its symbol
     let symbol = checker.getSymbolAtLocation(node.name);
     const matchedController = controllers.find(
       (item) => item.className === symbol?.getName()
@@ -33,40 +32,33 @@ export function visitMicroserviceClass(
     }
 
     const docEntries: DocEntry[] = [];
-    // console.log(node.decorators);
 
     node.forEachChild((child) => {
       if (!tsc.isMethodDeclaration(child)) {
         return;
       }
-      const topicDecorator = (child.decorators || []).find((item) => {
-        const expression: tsc.CallExpression =
-          item.expression as tsc.CallExpression;
-        const decoratorIdentifier = expression.expression as tsc.Identifier;
-        return decoratorIdentifier.escapedText === "Topic";
-      });
-      if (!topicDecorator) {
+
+      const topicParams = serializeTopicDecorators(child.decorators!, checker);
+      if (!topicParams) {
         return;
       }
       const docEntry: Partial<DocEntry> = {
         functionName: child.name.getText(),
-        topic: {
-          ...serializeTopicDecorator(topicDecorator, checker),
-        }
+        topic: topicParams,
       };
       docEntries.push(docEntry as DocEntry);
-
-      const signature = checker.getSignatureFromDeclaration(child);
-      if (!signature) {
-        return;
-      }
 
       /**
        * analyze return type of the function
        */
+      const signature = checker.getSignatureFromDeclaration(child);
+      if (!signature) {
+        return;
+      }
       const returnTypePathDic: Record<string, string[]> = {};
       const type = checker.getReturnTypeOfSignature(signature);
       analyzeType(type, checker, checker.typeToString(type), returnTypePathDic);
+
       /**
        * set return type information into docEntry
        */
@@ -75,10 +67,6 @@ export function visitMicroserviceClass(
         name: returnTypePathEntries[0][0],
         imports: returnTypePathEntries[0][1],
       };
-
-      /**
-       * analyzer topic
-       */
 
       /**
        * get microservice payload parameter
@@ -123,17 +111,30 @@ export function visitMicroserviceClass(
       };
     });
 
-    // console.log(JSON.stringify(docEntries, null, 2));
     microserviceConsumerGenerator(docEntries);
   }
 }
 
-function serializeTopicDecorator(
-  decorator: tsc.Decorator,
+function serializeTopicDecorators(
+  decorators: tsc.NodeArray<tsc.Decorator>,
   checker: tsc.TypeChecker
 ) {
-  const expression: tsc.CallExpression = decorator!
-    .expression as tsc.CallExpression;
+  if (!decorators) {
+    return;
+  }
+
+  const topicDecorator = (decorators || []).find((item) => {
+    const expression: tsc.CallExpression =
+      item.expression as tsc.CallExpression;
+    const decoratorIdentifier = expression.expression as tsc.Identifier;
+    return decoratorIdentifier.escapedText === "Topic";
+  });
+  if (!topicDecorator) {
+    return;
+  }
+
+  const expression: tsc.CallExpression =
+    topicDecorator.expression as tsc.CallExpression;
   const arg = expression.arguments[0] as tsc.PropertyAccessExpression;
   const argIdentifier = arg.expression as tsc.Identifier;
   const enumSymbol = checker.getSymbolAtLocation(arg);
