@@ -18,10 +18,17 @@ function Topic(value: string): MethodDecorator {
 
 export class UserController {
   @Topic(TopicEnum.GET_USER)
-  async getUser(
+  async getUsers(
     a: string,
     @Payload("value") createUserDto: CreateUserDto
-  ): Promise<UserModel[] | CompanyModel> {
+  ): Promise<UserModel[]> {
     return [new UserModel()];
+  }
+  @Topic(TopicEnum.GET_COMPANY)
+  async getCompany(
+    a: string,
+    @Payload("value") createUserDto: CreateUserDto
+  ): Promise<CompanyModel> {
+    return new CompanyModel();
   }
 }
