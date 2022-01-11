@@ -1,7 +1,6 @@
-import { CompanyModel } from "./company.model";
+import { CompanyModel } from './company.model';
 
 export class UserModel {
-  name!: string;
-
-  company!: CompanyModel;
+    name!: string;
+    company!: CompanyModel;
 }

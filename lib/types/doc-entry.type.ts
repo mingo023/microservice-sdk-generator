@@ -1,23 +1,22 @@
 export type DocParam = {
-  name: string;
-  type: string;
-  imports: string[];
+    type: string;
+    imports: Record<string, string>;
 };
 
 export type DocReturn = {
-  name: string;
-  imports: string[];
+    name: string;
+    imports: Record<string, string>;
 };
 
 export type DocTopic = {
-  enumName?: string;
-  argString?: string;
-  importPath?: string;
+    enumName?: string;
+    argString?: string;
+    importPath?: string;
 };
 
 export type DocEntry = {
-  functionName: string;
-  params: DocParam;
-  returnType: DocReturn;
-  topic: DocTopic;
+    functionName: string;
+    params: DocParam;
+    returnType: DocReturn;
+    topic: DocTopic;
 };
