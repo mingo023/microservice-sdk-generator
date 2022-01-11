@@ -7,7 +7,7 @@ import {
   ScriptTarget,
 } from "typescript";
 import { getControllerNames } from "./services/file-handler";
-import { visitMicroserviceClass } from "./services/serializer";
+import { visitMicroserviceClass } from "./services/analyzer";
 import configs from "../gen.config.json";
 import { UserController } from "../src/controllers/user.controller";
 

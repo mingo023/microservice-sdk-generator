@@ -6,16 +6,22 @@ import { UserModel } from "../models/user.model";
 
 export class Person {}
 
+function Topic(value: string): MethodDecorator {
+  return (
+    target: any,
+    propertyKey: string | symbol,
+    descriptor: PropertyDescriptor
+  ) => {
+    MessagePattern(value)(target, propertyKey, descriptor);
+  };
+}
+
 export class UserController {
-  @MessagePattern(TopicEnum.GET_USER)
+  @Topic(TopicEnum.GET_USER)
   async getUser(
     a: string,
     @Payload("value") createUserDto: CreateUserDto
   ): Promise<UserModel[] | CompanyModel> {
     return [new UserModel()];
-  }
-
-  async getCompany(): Promise<CompanyModel> {
-    return new CompanyModel();
   }
 }

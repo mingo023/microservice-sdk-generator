@@ -39,11 +39,20 @@ export function visitMicroserviceClass(
       if (!tsc.isMethodDeclaration(child)) {
         return;
       }
-      const decorators = child.decorators || [];
-      decorators.map((item) => serializeDecorator(item, checker));
-
+      const topicDecorator = (child.decorators || []).find((item) => {
+        const expression: tsc.CallExpression =
+          item.expression as tsc.CallExpression;
+        const decoratorIdentifier = expression.expression as tsc.Identifier;
+        return decoratorIdentifier.escapedText === "Topic";
+      });
+      if (!topicDecorator) {
+        return;
+      }
       const docEntry: Partial<DocEntry> = {
         functionName: child.name.getText(),
+        topic: {
+          ...serializeTopicDecorator(topicDecorator, checker),
+        }
       };
       docEntries.push(docEntry as DocEntry);
 
@@ -66,6 +75,10 @@ export function visitMicroserviceClass(
         name: returnTypePathEntries[0][0],
         imports: returnTypePathEntries[0][1],
       };
+
+      /**
+       * analyzer topic
+       */
 
       /**
        * get microservice payload parameter
@@ -110,24 +123,36 @@ export function visitMicroserviceClass(
       };
     });
 
-    // microserviceConsumerGenerator(docEntries);
+    // console.log(JSON.stringify(docEntries, null, 2));
+    microserviceConsumerGenerator(docEntries);
   }
 }
 
-function serializeDecorator(
+function serializeTopicDecorator(
   decorator: tsc.Decorator,
   checker: tsc.TypeChecker
 ) {
-  const symbol = checker.getSymbolAtLocation(
-    decorator!.expression!.getFirstToken() as tsc.Node
-  ) as tsc.Symbol;
-
   const expression: tsc.CallExpression = decorator!
     .expression as tsc.CallExpression;
   const arg = expression.arguments[0] as tsc.PropertyAccessExpression;
-  // const identifier = arg.expression as tsc.Identifier;
+  const argIdentifier = arg.expression as tsc.Identifier;
   const enumSymbol = checker.getSymbolAtLocation(arg);
-  console.log(enumSymbol?.getDeclarations()?.[0].getSourceFile().fileName);
+
+  const importPath = enumSymbol
+    ?.getDeclarations()?.[0]
+    .getSourceFile().fileName;
+  const enumName = argIdentifier?.getFullText();
+  let argString = arg?.getFullText();
+  if (!enumName) {
+    const type = checker.getTypeAtLocation(arg) as tsc.StringLiteralType;
+    argString = `'${type.value}'`;
+  }
+
+  return {
+    argString,
+    enumName,
+    importPath: enumName && importPath,
+  };
 }
 
 export function analyzeType(
