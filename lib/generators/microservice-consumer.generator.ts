@@ -1,17 +1,20 @@
 import prettier from 'prettier';
-import { template, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import path from 'path';
 import { DocEntry } from '../types/doc-entry.type';
 
 export function microserviceConsumerGenerator(currentPath: string, serviceName: string, docEntries: DocEntry[]) {
     const kafkaConsumerMethods = [];
     for (const item of docEntries) {
+        console.log('----', JSON.stringify(item, null, 2));
         const modelName = getModelType(item.returnType.name);
+        const getter = isArrayModel(item.returnType.name) ? 'getMany()' : 'getOne()';
+
         const template = `
-        ${item.functionName}(data: ${item.params?.type || 'any'}): MicroserviceHelper<${modelName}> {
+        ${item.functionName}(data: ${item.params?.type || 'any'}): ${item.returnType.name} {
             return MicroserviceHelper.with(this.client, ${modelName}, this.topicPrefix).topic(${
             item.topic.argString
-        }).data(data);
+        }).data(data).${getter};
         }
     `;
         kafkaConsumerMethods.push(template);
@@ -20,8 +23,8 @@ export function microserviceConsumerGenerator(currentPath: string, serviceName: 
     const fileTemplate = `
     import { Injectable } from "@nestjs/common";
     import { ClientKafka } from "@nestjs/microservices";
-    import { MicroserviceHelper } from "../../../lib/core/microservice-helper";
-    import { BaseMicroservice } from "../../../lib/core/base-microservice";
+    import { BaseMicroservice } from "../../core/base-microservice";
+    import { MicroserviceHelper } from "../../core/microservice-helper";
     ${generateImport(getImports(currentPath, docEntries))}
 
     @Injectable()

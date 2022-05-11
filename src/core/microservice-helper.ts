@@ -1,7 +1,7 @@
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
 import { HttpException } from '@nestjs/common';
-import { plainToClass, plainToInstance } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { Cache, CachingConfig } from 'cache-manager';
 import md5 from 'md5';
 
