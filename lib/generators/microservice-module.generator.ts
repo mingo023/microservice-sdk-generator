@@ -5,12 +5,13 @@ export function microserviceModuleGenerator(currentPath: string, servicePath: st
     const moduleTemplate = `
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { ${serviceName} } from '${getServiceRelativePath(currentPath, servicePath)}'
-import { CLIENT_NAME, TOPIC_PREFIX } from '../../lib/core/module-config.constant';
+import { CLIENT_NAME, TOPIC_PREFIX } from '../../lib/resources/module-config.constant';
+import { MicroserviceOptions } from '../../lib/resources/module-config.type';
 
 @Global()
 @Module({})
 export class ${serviceName}Module {
-    static forRoot(config: any): DynamicModule {
+    static forRoot(config: MicroserviceOptions): DynamicModule {
         return {
             module: ${serviceName}Module,
             imports: [],

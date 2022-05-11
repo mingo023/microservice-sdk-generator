@@ -1,7 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { ClientKafka } from "@nestjs/microservices";
-import { BaseMicroservice } from "../../lib/core/base-microservice";
-import { MicroserviceHelper } from "../../lib/core/microservice-helper";
+import { ModuleRef } from "@nestjs/core";
+import { BaseMicroservice } from "../../lib/resources/base-microservice";
+import { MicroserviceHelper } from "../../lib/resources/microservice-helper";
+import {
+    CLIENT_NAME,
+    TOPIC_PREFIX,
+} from "../../lib/resources/module-config.constant";
 import { TopicEnum } from "../../src/enums/topic.enum";
 import { UserModel } from "../../src/models/user.model";
 import { CreateUserDto } from "../../src/dto/create-user.dto";
@@ -9,8 +14,14 @@ import { CompanyModel } from "../../src/models/company.model";
 
 @Injectable()
 export class UserMicroservice extends BaseMicroservice {
-    constructor(private client: ClientKafka, private topicPrefix: string) {
+    private topicPrefix: string = "";
+    private client: ClientKafka;
+
+    constructor(private moduleRef: ModuleRef) {
         super();
+
+        this.topicPrefix = this.moduleRef.get(TOPIC_PREFIX, { strict: false });
+        this.client = this.moduleRef.get(CLIENT_NAME, { strict: false });
     }
 
     getUsers(data: CreateUserDto): Promise<UserModel[]> {

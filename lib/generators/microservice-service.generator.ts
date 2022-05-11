@@ -22,14 +22,22 @@ export function microserviceConsumerGenerator(currentPath: string, serviceName: 
     const fileTemplate = `
     import { Injectable } from "@nestjs/common";
     import { ClientKafka } from "@nestjs/microservices";
-    import { BaseMicroservice } from "../../lib/core/base-microservice";
-    import { MicroserviceHelper } from "../../lib/core/microservice-helper";
+    import { ModuleRef } from '@nestjs/core';
+    import { BaseMicroservice } from "../../lib/resources/base-microservice";
+    import { MicroserviceHelper } from "../../lib/resources/microservice-helper";
+    import { CLIENT_NAME, TOPIC_PREFIX } from '../../lib/resources/module-config.constant';
     ${generateImport(getImports(currentPath, docEntries))}
 
     @Injectable()
     export class ${serviceName} extends BaseMicroservice {
-        constructor(private client: ClientKafka, private topicPrefix: string) {
+        private topicPrefix: string = '';
+        private client: ClientKafka;
+
+        constructor(private moduleRef: ModuleRef) {
             super();
+
+            this.topicPrefix = this.moduleRef.get(TOPIC_PREFIX, { strict: false })
+            this.client = this.moduleRef.get(CLIENT_NAME, { strict: false })
         }
 
         ${kafkaConsumerMethods.join('\n')}
@@ -70,7 +78,6 @@ function getImports(currentPath: string, docEntries: DocEntry[]) {
     return imports.reduce<any>((acc, cur) => {
         const entry = Object.entries(cur)[0];
         const typeName = entry[0];
-        console.log(path.relative(path.dirname(currentPath), entry[1]));
         const importPath = serializeRelativePath(currentPath, entry[1]);
 
         if (acc[importPath]) {

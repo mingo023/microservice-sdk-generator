@@ -3,12 +3,13 @@ import { UserMicroservice } from "../services/user.service";
 import {
     CLIENT_NAME,
     TOPIC_PREFIX,
-} from "../../lib/core/module-config.constant";
+} from "../../lib/resources/module-config.constant";
+import { MicroserviceOptions } from "../../lib/resources/module-config.type";
 
 @Global()
 @Module({})
 export class UserMicroserviceModule {
-    static forRoot(config: any): DynamicModule {
+    static forRoot(config: MicroserviceOptions): DynamicModule {
         return {
             module: UserMicroserviceModule,
             imports: [],

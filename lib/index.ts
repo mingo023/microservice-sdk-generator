@@ -22,7 +22,7 @@ export async function main(options: CompilerOptions) {
                 forEachChild(sourceFile, (node) => {
                     const type = checker.getTypeAtLocation(node);
                     const symbolName = type.getSymbol()?.escapedName;
-                    if (!symbolName?.endsWith('Microservice')) {
+                    if (!symbolName?.toString()?.endsWith('Microservice')) {
                         return;
                     }
                     serviceName = symbolName;
