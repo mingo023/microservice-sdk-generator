@@ -1,6 +1,7 @@
 [
     {
         "entry": "src/microservices/user.microservice.ts",
-        "out": "src/sdk/services/user.service.ts"
+        "serviceOut": "sdk/services/user.service.ts",
+        "moduleOut": "sdk/modules/user.module.ts"
     }
 ]

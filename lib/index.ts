@@ -4,8 +4,9 @@ import { getControllerNames } from './services/file-handler';
 import { visitMicroserviceClass } from './services/analyzer';
 import configs from '../gen.config.json';
 import { fileGenerator } from './generators/file.generator';
-import { microserviceConsumerGenerator } from './generators/microservice-consumer.generator';
 import { DocEntry } from './types/doc-entry.type';
+import { microserviceConsumerGenerator } from './generators/microservice-service.generator';
+import { microserviceModuleGenerator } from './generators/microservice-module.generator';
 
 export async function main(options: CompilerOptions) {
     for (const item of configs) {
@@ -26,14 +27,16 @@ export async function main(options: CompilerOptions) {
                     }
                     serviceName = symbolName;
 
-                    docEntries = visitMicroserviceClass(checker, node, controllers, item.out) || [];
+                    docEntries = visitMicroserviceClass(checker, node, controllers) || [];
                 });
             }
         }
 
         if (docEntries.length) {
-            const fileContent = microserviceConsumerGenerator(item.out, serviceName, docEntries);
-            await fileGenerator(item.out, fileContent);
+            const serviceContent = microserviceConsumerGenerator(item.serviceOut, serviceName, docEntries);
+            const moduleContent = microserviceModuleGenerator(item.moduleOut, item.serviceOut,serviceName);
+            await fileGenerator(item.serviceOut, serviceContent);
+            await fileGenerator(item.moduleOut, moduleContent);
         }
     }
 }

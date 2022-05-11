@@ -1,5 +1,4 @@
-import * as tsc from 'typescript';
-import { microserviceConsumerGenerator } from '../generators/microservice-consumer.generator';
+import tsc from 'typescript';
 import { ControllerInputType } from '../types/controller-input.type';
 import { DocEntry } from '../types/doc-entry.type';
 
@@ -7,7 +6,6 @@ export function visitMicroserviceClass(
     checker: tsc.TypeChecker,
     node: tsc.Node,
     controllers: ControllerInputType[],
-    outDir: string
 ) {
     if (!isNodeExported(node)) {
         return;

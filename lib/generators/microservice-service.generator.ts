@@ -6,7 +6,6 @@ import { DocEntry } from '../types/doc-entry.type';
 export function microserviceConsumerGenerator(currentPath: string, serviceName: string, docEntries: DocEntry[]) {
     const kafkaConsumerMethods = [];
     for (const item of docEntries) {
-        console.log('----', JSON.stringify(item, null, 2));
         const modelName = getModelType(item.returnType.name);
         const getter = isArrayModel(item.returnType.name) ? 'getMany()' : 'getOne()';
 
@@ -23,8 +22,8 @@ export function microserviceConsumerGenerator(currentPath: string, serviceName: 
     const fileTemplate = `
     import { Injectable } from "@nestjs/common";
     import { ClientKafka } from "@nestjs/microservices";
-    import { BaseMicroservice } from "../../core/base-microservice";
-    import { MicroserviceHelper } from "../../core/microservice-helper";
+    import { BaseMicroservice } from "../../lib/core/base-microservice";
+    import { MicroserviceHelper } from "../../lib/core/microservice-helper";
     ${generateImport(getImports(currentPath, docEntries))}
 
     @Injectable()
@@ -34,11 +33,10 @@ export function microserviceConsumerGenerator(currentPath: string, serviceName: 
         }
 
         ${kafkaConsumerMethods.join('\n')}
-
     }
   `;
 
-    return prettier.format(fileTemplate, { parser: 'typescript' });
+    return prettier.format(fileTemplate, { parser: 'typescript', tabWidth: 4 });
 }
 
 function serializeRelativePath(from: string, to: string) {
@@ -72,6 +70,7 @@ function getImports(currentPath: string, docEntries: DocEntry[]) {
     return imports.reduce<any>((acc, cur) => {
         const entry = Object.entries(cur)[0];
         const typeName = entry[0];
+        console.log(path.relative(path.dirname(currentPath), entry[1]));
         const importPath = serializeRelativePath(currentPath, entry[1]);
 
         if (acc[importPath]) {
