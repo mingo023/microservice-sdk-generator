@@ -1,12 +1,15 @@
-import path from 'path';
+import { serializeRelativePath } from '../helpers/file.helper';
 import prettier from 'prettier';
 
 export function microserviceModuleGenerator(currentPath: string, servicePath: string, serviceName: string): string {
     const moduleTemplate = `
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { ${serviceName} } from '${getServiceRelativePath(currentPath, servicePath)}'
-import { CLIENT_NAME, TOPIC_PREFIX } from '../../lib/resources/module-config.constant';
-import { MicroserviceOptions } from '../../lib/resources/module-config.type';
+import { ${serviceName} } from '${serializeRelativePath(currentPath, servicePath)}'
+import { CLIENT_NAME, TOPIC_PREFIX } from '${serializeRelativePath(
+        currentPath,
+        'lib/resources/module-config.constant'
+    )}';
+import { MicroserviceOptions } from '${serializeRelativePath(currentPath, 'lib/types/module-config.type')}';
 
 @Global()
 @Module({})
@@ -33,8 +36,4 @@ export class ${serviceName}Module {
 `;
 
     return prettier.format(moduleTemplate, { parser: 'typescript', tabWidth: 4 });
-}
-
-function getServiceRelativePath(currentPath: string, servicePath: string): string {
-    return path.relative(path.dirname(currentPath), servicePath).replace('.ts', '');
 }

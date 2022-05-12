@@ -1,7 +1,6 @@
 import prettier from 'prettier';
-import { uniq } from 'lodash';
-import path from 'path';
 import { DocEntry } from '../types/doc-entry.type';
+import { generateImport, getImports, serializeRelativePath } from '../helpers/file.helper';
 
 export function microserviceConsumerGenerator(currentPath: string, serviceName: string, docEntries: DocEntry[]) {
     const kafkaConsumerMethods = [];
@@ -23,9 +22,12 @@ export function microserviceConsumerGenerator(currentPath: string, serviceName: 
     import { Injectable } from "@nestjs/common";
     import { ClientKafka } from "@nestjs/microservices";
     import { ModuleRef } from '@nestjs/core';
-    import { BaseMicroservice } from "../../lib/resources/base-microservice";
-    import { MicroserviceHelper } from "../../lib/resources/microservice-helper";
-    import { CLIENT_NAME, TOPIC_PREFIX } from '../../lib/resources/module-config.constant';
+    import { BaseMicroservice } from '${serializeRelativePath(currentPath, 'lib/resources/base-microservice.ts')}';
+    import { MicroserviceHelper } from '${serializeRelativePath(currentPath, 'lib/resources/microservice-helper')}';
+    import { CLIENT_NAME, TOPIC_PREFIX } from '${serializeRelativePath(
+        currentPath,
+        'lib/resources/module-config.constant'
+    )}';
     ${generateImport(getImports(currentPath, docEntries))}
 
     @Injectable()
@@ -45,49 +47,6 @@ export function microserviceConsumerGenerator(currentPath: string, serviceName: 
   `;
 
     return prettier.format(fileTemplate, { parser: 'typescript', tabWidth: 4 });
-}
-
-function serializeRelativePath(from: string, to: string) {
-    const relativePath = path.relative(path.dirname(from), to);
-    if (relativePath.endsWith('.ts')) {
-        return relativePath.replace('.ts', '');
-    }
-    return relativePath;
-}
-
-function generateImport(paths: Record<string, string[]>) {
-    return Object.entries(paths)
-        .map(([importPath, typeName]) => {
-            return `import { ${uniq(typeName).join(', ')} } from '${importPath}';`;
-        })
-        .join('\n');
-}
-
-function getImports(currentPath: string, docEntries: DocEntry[]) {
-    const imports: Record<string, string>[] = [];
-    for (const item of docEntries) {
-        if (item.topic?.enumName && item.topic?.importPath) {
-            imports.push({
-                [item.topic.enumName]: item.topic.importPath
-            });
-        }
-        imports.push(item.returnType.imports);
-        imports.push(item.params.imports);
-    }
-
-    return imports.reduce<any>((acc, cur) => {
-        const entry = Object.entries(cur)[0];
-        const typeName = entry[0];
-        const importPath = serializeRelativePath(currentPath, entry[1]);
-
-        if (acc[importPath]) {
-            acc[importPath].push(typeName);
-        } else {
-            acc[importPath] = [typeName];
-        }
-
-        return acc;
-    }, {});
 }
 
 function isArrayModel(model: string) {

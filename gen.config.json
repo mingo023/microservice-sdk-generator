@@ -1,7 +1,7 @@
 [
     {
         "entry": "src/microservices/user.microservice.ts",
-        "serviceOut": "sdk/services/user.service.ts",
-        "moduleOut": "sdk/modules/user.module.ts"
+        "serviceOut": "/Users/minhngo/dev/sandbox/sdk/services/user.service.ts",
+        "moduleOut": "/Users/minhngo/dev/sandbox/sdk/modules/user.module.ts"
     }
 ]

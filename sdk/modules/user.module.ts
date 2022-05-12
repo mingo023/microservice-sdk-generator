@@ -4,7 +4,7 @@ import {
     CLIENT_NAME,
     TOPIC_PREFIX,
 } from "../../lib/resources/module-config.constant";
-import { MicroserviceOptions } from "../../lib/resources/module-config.type";
+import { MicroserviceOptions } from "../../lib/types/module-config.type";
 
 @Global()
 @Module({})
