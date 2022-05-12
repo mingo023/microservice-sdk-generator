@@ -34,11 +34,6 @@ export function getImports(currentPath: string, docEntries: DocEntry[]) {
         const entry = Object.entries(cur)[0];
         const typeName = entry[0];
         const importPath = serializeRelativePath(currentPath, entry[1]);
-        console.log({
-            currentPath,
-            entry: entry[1],
-            importPath
-        });
 
         if (acc[importPath]) {
             acc[importPath].push(typeName);

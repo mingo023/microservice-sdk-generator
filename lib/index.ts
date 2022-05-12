@@ -9,29 +9,29 @@ import { microserviceModuleGenerator } from './generators/microservice-module.ge
 
 export async function main(options: CompilerOptions) {
     for (const item of configs) {
-        const program = createProgram([item.entry], options);
-        const checker = program.getTypeChecker();
-
         let docEntries: DocEntry[] = [];
-        let serviceName: string = '';
-        for (const sourceFile of program.getSourceFiles()) {
-            if (!sourceFile.isDeclarationFile) {
-                forEachChild(sourceFile, (node) => {
-                    const type = checker.getTypeAtLocation(node);
-                    const symbolName = type.getSymbol()?.escapedName;
-                    if (!symbolName?.toString()?.endsWith('Microservice')) {
-                        return;
-                    }
-                    serviceName = symbolName;
+        for (const entry of item.entry) {
+            const program = createProgram([entry], options);
+            const checker = program.getTypeChecker();
 
-                    docEntries = visitMicroserviceClass(checker, node) || [];
-                });
+            for (const sourceFile of program.getSourceFiles()) {
+                if (!sourceFile.isDeclarationFile) {
+                    forEachChild(sourceFile, (node) => {
+                        const type = checker.getTypeAtLocation(node);
+                        const symbolName = type.getSymbol()?.escapedName;
+                        if (!symbolName?.toString()?.endsWith('Microservice')) {
+                            return;
+                        }
+
+                        docEntries.push(...(visitMicroserviceClass(checker, node) || []));
+                    });
+                }
             }
         }
 
         if (docEntries.length) {
-            const serviceContent = microserviceConsumerGenerator(item.serviceOut, serviceName, docEntries);
-            const moduleContent = microserviceModuleGenerator(item.moduleOut, item.serviceOut,serviceName);
+            const serviceContent = microserviceConsumerGenerator(item.serviceOut, item.serviceName, docEntries);
+            const moduleContent = microserviceModuleGenerator(item.moduleOut, item.serviceOut, item.serviceName);
             await fileGenerator(item.serviceOut, serviceContent);
             await fileGenerator(item.moduleOut, moduleContent);
         }

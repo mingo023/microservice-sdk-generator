@@ -41,4 +41,11 @@ export class UserMicroservice extends BaseMicroservice {
             .data(data)
             .getOne();
     }
+
+    getReport(data: CreateUserDto): Promise<UserModel[]> {
+        return MicroserviceHelper.with(this.client, UserModel, this.topicPrefix)
+            .topic(TopicEnum.GET_REPORT)
+            .data(data)
+            .getMany();
+    }
 }

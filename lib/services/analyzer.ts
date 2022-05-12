@@ -90,20 +90,22 @@ function analyzeTopicDecorators(decorators: tsc.NodeArray<tsc.Decorator>, checke
     }
 
     const expression: tsc.CallExpression = topicDecorator.expression as tsc.CallExpression;
-    const arg = expression.arguments[0] as tsc.PropertyAccessExpression;
-    const argIdentifier = arg.expression as tsc.Identifier;
-    const enumSymbol = checker.getSymbolAtLocation(arg);
 
-    const importPath = enumSymbol?.getDeclarations()?.[0].getSourceFile().fileName;
-    const enumName = argIdentifier?.getFullText();
-    let argString = arg?.getFullText();
-    if (!enumName) {
-        const type = checker.getTypeAtLocation(arg) as tsc.StringLiteralType;
-        argString = `'${type.value}'`;
-    }
+    const arg = expression.arguments[0] as tsc.ObjectLiteralExpression;
+
+    const propertyAssignment = arg.properties[0] as tsc.PropertyAssignment;
+    const initializer = propertyAssignment.initializer as tsc.PropertyAccessExpression;
+    const propertyExpression = initializer.expression;
+
+    const enumName = propertyExpression.getFullText();
+    const importPath = checker
+        .getSymbolAtLocation(propertyAssignment.initializer)
+        ?.getDeclarations()?.[0]
+        .getSourceFile().fileName;
+    const argString = initializer.name.getFullText();
 
     return {
-        argString,
+        argString: `${enumName}.${argString}`,
         enumName,
         importPath: enumName && importPath
     };
