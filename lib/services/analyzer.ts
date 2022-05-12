@@ -1,20 +1,15 @@
 import tsc from 'typescript';
-import { ControllerInputType } from '../types/controller-input.type';
 import { DocEntry } from '../types/doc-entry.type';
 
-export function visitMicroserviceClass(
-    checker: tsc.TypeChecker,
-    node: tsc.Node,
-    controllers: ControllerInputType[],
-) {
+export function visitMicroserviceClass(checker: tsc.TypeChecker, node: tsc.Node) {
     if (!isNodeExported(node)) {
         return;
     }
 
     if (tsc.isClassDeclaration(node) && node.name) {
         let symbol = checker.getSymbolAtLocation(node.name);
-        const matchedController = controllers.find((item) => item.className === symbol?.getName());
-        if (!matchedController) {
+
+        if (!symbol) {
             return;
         }
 
@@ -57,19 +52,9 @@ export function visitMicroserviceClass(
             /**
              * get microservice payload parameter
              */
-            const valueInputIndexMeta = Reflect.getMetadata(
-                '__routeArguments__',
-                matchedController.classDeclaration,
-                child.name.getText()
+            const childParam = child.parameters.find((item) =>
+                checker.getSymbolAtLocation(item.name)?.escapedName.toString().endsWith('Dto')
             );
-            if (!valueInputIndexMeta) {
-                return;
-            }
-
-            const valueInputIndex = Object.entries(valueInputIndexMeta)[0][1] as {
-                index: number;
-            };
-            const childParam = child.parameters.find((_, index) => index === valueInputIndex.index);
             if (!childParam) {
                 return;
             }

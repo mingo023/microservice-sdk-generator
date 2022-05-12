@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import { CompilerOptions, createProgram, forEachChild, ModuleKind, ScriptTarget } from 'typescript';
-import { getControllerNames } from './services/file-handler';
 import { visitMicroserviceClass } from './services/analyzer';
 import configs from '../gen.config.json';
 import { fileGenerator } from './generators/file.generator';
@@ -12,8 +11,6 @@ export async function main(options: CompilerOptions) {
     for (const item of configs) {
         const program = createProgram([item.entry], options);
         const checker = program.getTypeChecker();
-
-        const controllers = await getControllerNames([item.entry]);
 
         let docEntries: DocEntry[] = [];
         let serviceName: string = '';
@@ -27,7 +24,7 @@ export async function main(options: CompilerOptions) {
                     }
                     serviceName = symbolName;
 
-                    docEntries = visitMicroserviceClass(checker, node, controllers) || [];
+                    docEntries = visitMicroserviceClass(checker, node) || [];
                 });
             }
         }
@@ -43,5 +40,9 @@ export async function main(options: CompilerOptions) {
 
 main({
     target: ScriptTarget.ES5,
-    module: ModuleKind.CommonJS
+    module: ModuleKind.CommonJS,
+    baseUrl: './',
+    paths: {
+        '~*': ['src/*']
+    }
 });

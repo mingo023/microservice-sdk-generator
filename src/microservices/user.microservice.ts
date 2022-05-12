@@ -1,8 +1,8 @@
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { TopicEnum } from '../enums/topic.enum';
-import { CompanyModel } from '../models/company.model';
-import { UserModel } from '../models/user.model';
+import { CreateUserDto } from '~dto/create-user.dto';
+import { TopicEnum } from '~enums/topic.enum';
+import { CompanyModel } from '~models/company.model';
+import { UserModel } from '~models/user.model';
 
 export class Person {}
 
